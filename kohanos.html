@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOS Shell Simulator</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        #terminal {
+            white-space: pre-wrap;
+            margin-bottom: 10px;
+        }
+
+        #command-line {
+            display: flex;
+        }
+
+        #prompt {
+            margin-right: 10px;
+        }
+
+        #command-input {
+            background-color: transparent;
+            border: none;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            flex-grow: 1;
+            outline: none;
+        }
+
+        .ascii-art {
+            color: #0f0;
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+
+        .output {
+            margin-bottom: 10px;
+        }
+
+        .error {
+            color: #f00;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="terminal">
+        <div class="ascii-art">
+            <pre style="font-size:8px;">
+            ░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░░▒▓███████▓▒░     ░▒▓██████▓▒░░▒▓███████▓▒░
+            ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░   ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░
+            ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░   ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░
+            ░▒▓█████▓▒░  ░▒▓█▓▒░░▒▓█▓▒░▒▓████████▓▒░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░   ░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░
+            ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░   ░▒▓█▓▒░░▒▓█▓▒░     ░▒▓█▓▒░
+            ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░   ░▒▓█▓▒░░▒▓█▓▒░     ░▒▓█▓▒░
+            ░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░    ░▒▓██████▓▒░░▒▓███████▓▒░
+
+                        </pre>
+        </div>
+        <div class="output">به شل شبیه به DOS خوش اومدی! (برای خروج 'exit' رو وارد کن)</div>
+    </div>
+    <div id="command-line">
+        <div id="prompt">REM&gt;</div>
+        <input type="text" id="command-input" autofocus>
+    </div>
+
+    <script>
+        const terminal = document.getElementById('terminal');
+        const commandInput = document.getElementById('command-input');
+
+        // Store website content for search functionality
+        let websiteContent = '';
+
+        function addOutput(text, isError = false) {
+            const output = document.createElement('div');
+            output.className = isError ? 'error output' : 'output';
+            output.textContent = text;
+            terminal.appendChild(output);
+        }
+
+        function cleanText(text) {
+            const lines = text.split('\n');
+            const cleanedLines = [];
+            for (const line of lines) {
+                if (line.trim() && line.trim().length > 5) {
+                    cleanedLines.push(line.trim());
+                }
+            }
+            return cleanedLines.join('\n');
+        }
+
+        function fetchWebsiteContent(url) {
+            addOutput(`در حال دریافت محتوای ${url}...`);
+
+            // In a real implementation, you would use a CORS proxy or backend service
+            // This is just a simulation
+            setTimeout(() => {
+                if (url.includes('example.com') || url.includes('google.com')) {
+                    const simulatedContent = `
+                    <html>
+                        <head><title>Test Page</title></head>
+                        <body>
+                            <h1>Welcome to Test Page</h1>
+                            <p>This is a simulated website content.</p>
+                            <p>Another paragraph with more text for demonstration.</p>
+                        </body>
+                    </html>
+                    `;
+
+                    // Simulate BeautifulSoup parsing
+                    const textContent = simulatedContent
+                        .replace(/<[^>]*>/g, '') // Remove HTML tags
+                        .replace(/\s+/g, ' ');    // Normalize whitespace
+
+                    websiteContent = cleanText(textContent);
+
+                    addOutput("محتوای متنی وب‌سایت (پس از پاک‌سازی):");
+                    addOutput(websiteContent);
+                } else {
+                    addOutput(`خطا در دریافت وب‌سایت: Could not fetch ${url} (simulated error)`, true);
+                }
+            }, 1000);
+        }
+
+        function searchInText(keyword) {
+            if (websiteContent.includes(keyword)) {
+                addOutput(`عبارت '${keyword}' در متن پیدا شد!`);
+            } else {
+                addOutput(`عبارت '${keyword}' در متن پیدا نشد.`);
+            }
+        }
+
+        function calculate(expression) {
+            try {
+                // Check for sqrt
+                if (expression.includes('sqrt')) {
+                    const number = parseFloat(expression.split('sqrt')[1].trim());
+                    if (isNaN(number)) throw new Error('عدد نامعتبر');
+                    if (number < 0) throw new Error('عدد منفی برای جذر');
+                    const result = Math.round(Math.sqrt(number) * 100) / 100;
+                    addOutput(`جذر ${number}: ${result}`);
+                } else {
+                    // Very basic and unsafe eval simulation - in real code you'd want a proper parser
+                    const result = eval(expression);
+                    addOutput(`نتیجه: ${Math.round(result * 100) / 100}`);
+                }
+            } catch (e) {
+                addOutput(`خطا در محاسبه: ${e.message}`, true);
+            }
+        }
+
+        function processCommand(command) {
+            addOutput(`C:\\> ${command}`);
+
+            if (command.toLowerCase() === 'exit') {
+                addOutput("خروج از شل...");
+                commandInput.disabled = true;
+                return;
+            }
+        }
+
+
+        function processCommand(command) {
+            addOutput(`C:\\> ${command}`);
+
+            if (command.toLowerCase() === 'exit') {
+                addOutput("خروج از شل...");
+                commandInput.disabled = true;
+                return;
+            } else if (command.toLowerCase() === 'help') {
+                addOutput("دستورات موجود:");
+                addOutput("--------------");
+                addOutput("help         - نمایش این راهنما");
+                addOutput("dir          - نمایش محتویات دایرکتوری (شبیه‌سازی شده)");
+                addOutput("cls          - پاک کردن صفحه ترمینال");
+                addOutput("echo [پیام]  - نمایش پیام وارد شده");
+                addOutput("             مثال: echo سلام دنیا");
+                addOutput("html         - دریافت و نمایش کد HTML از کاربر");
+                addOutput("get [URL]    - دریافت محتوای یک وبسایت (شبیه‌سازی شده)");
+                addOutput("             مثال: get https://example.com");
+                addOutput("calc [عبارت] - انجام محاسبات ریاضی");
+                addOutput("             مثال: calc 5+3*2");
+                addOutput("             مثال: calc sqrt(16)");
+                addOutput("srch [کلمه]  - جستجوی کلمه در محتوای دریافت شده");
+                addOutput("             مثال: srch متن");
+                addOutput("exit         - خروج از برنامه");
+
+            } else if (command.toLowerCase() === 'dir') {
+                addOutput(" Volume in drive C has no label.");
+                addOutput(" Volume Serial Number is 1234-5678");
+                addOutput("");
+                addOutput(" Directory of C:\\");
+                addOutput("");
+                addOutput("01/01/2023  12:00 AM    <DIR>          Program Files");
+                addOutput("01/01/2023  12:00 AM    <DIR>          Users");
+                addOutput("01/01/2023  12:00 AM    <DIR>          Windows");
+                addOutput("01/01/2023  12:00 AM                24 autoexec.bat");
+                addOutput("01/01/2023  12:00 AM                10 config.sys");
+                addOutput("               2 File(s)             34 bytes");
+                addOutput("               3 Dir(s)  1,024,000 bytes free");
+            } else if (command.toLowerCase() === 'cls') {
+                terminal.innerHTML = '';
+                terminal.appendChild(document.createElement('div')).textContent = "به شل شبیه به DOS خوش اومدی! (برای خروج 'exit' رو وارد کن)";
+            } else if (command.toLowerCase() === 'echo') {
+                const message = prompt("پیام رو وارد کن:");
+                if (message !== null) {
+                    addOutput(message);
+                }
+            } else if (command.toLowerCase() === 'html') {
+                const htmlCode = prompt("کد HTML خود را وارد کنید (برای خروج 'exit' رو وارد کنید):");
+                if (htmlCode && htmlCode.toLowerCase() !== 'exit') {
+                    addOutput("خروجی HTML:");
+                    addOutput(htmlCode);
+                }
+            } else if (command.startsWith('get ')) {
+                const url = command.substring(4).trim();
+                if (url) {
+                    fetchWebsiteContent(url);
+                } else {
+                    addOutput("لطفاً یک URL معتبر وارد کنید.", true);
+                }
+            } else if (command.startsWith('calc ')) {
+                const expression = command.substring(5).trim();
+                if (expression) {
+                    calculate(expression);
+                } else {
+                    addOutput("لطفاً یک عبارت معتبر وارد کنید.", true);
+                }
+            } else if (command.startsWith('srch ')) {
+                const keyword = command.substring(5).trim();
+                if (keyword) {
+                    if (websiteContent) {
+                        searchInText(keyword);
+                    } else {
+                        addOutput("ابتدا با دستور 'get' یک وبسایت را دریافت کنید.", true);
+                    }
+                } else {
+                    addOutput("لطفاً یک کلمه یا عبارت برای جستجو وارد کنید.", true);
+                }
+            } else {
+                addOutput("دستور نامعتبر! لطفا دوباره امتحان کن.", true);
+            }
+
+            // Scroll to bottom
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        commandInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                processCommand(commandInput.value);
+                commandInput.value = '';
+                // Scroll to bottom
+                terminal.scrollTop = terminal.scrollHeight;
+            }
+        });
+    </script>
+</body>
+<!--
+ ██ ▄█▀ ▒█████   ██░ ██  ▄▄▄       ███▄    █   ██████  ▄▄▄       ██▓    
+ ██▄█▒ ▒██▒  ██▒▓██░ ██▒▒████▄     ██ ▀█   █ ▒██    ▒ ▒████▄    ▓██▒    
+▓███▄░ ▒██░  ██▒▒██▀▀██░▒██  ▀█▄  ▓██  ▀█ ██▒░ ▓██▄   ▒██  ▀█▄  ▒██░    
+▓██ █▄ ▒██   ██░░▓█ ░██ ░██▄▄▄▄██ ▓██▒  ▐▌██▒  ▒   ██▒░██▄▄▄▄██ ▒██░    
+▒██▒ █▄░ ████▓▒░░▓█▒░██▓ ▓█   ▓██▒▒██░   ▓██░▒██████▒▒ ▓█   ▓██▒░██████▒
+▒ ▒▒ ▓▒░ ▒░▒░▒░  ▒ ░░▒░▒ ▒▒   ▓▒█░░ ▒░   ▒ ▒ ▒ ▒▓▒ ▒ ░ ▒▒   ▓▒█░░ ▒░▓  ░
+░ ░▒ ▒░  ░ ▒ ▒░  ▒ ░▒░ ░  ▒   ▒▒ ░░ ░░   ░ ▒░░ ░▒  ░ ░  ▒   ▒▒ ░░ ░ ▒  ░
+░ ░░ ░ ░ ░ ░ ▒   ░  ░░ ░  ░   ▒      ░   ░ ░ ░  ░  ░    ░   ▒     ░ ░   
+░  ░       ░ ░   ░  ░  ░      ░  ░         ░       ░        ░  ░    ░  ░</pre> -->
+</html>
